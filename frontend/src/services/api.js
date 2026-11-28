@@ -48,3 +48,10 @@ export const horarioService = {
   crear: (h) => apiFetch('/horarios', { method: 'POST', body: JSON.stringify(h) }),
   eliminar: (id) => apiFetch(`/horarios/${id}, { method: 'DELETE' }`),
 };
+
+export const incidenciaService = {
+  listar: () => apiFetch('/incidencias'),
+  crear: (inc) => apiFetch('/incidencias', { method: 'POST', body: JSON.stringify(inc) }),
+  actualizar: (id, datos) =>
+    apiFetch(`/incidencias/${id}`, { method: 'PATCH', body: JSON.stringify(datos) }),
+};

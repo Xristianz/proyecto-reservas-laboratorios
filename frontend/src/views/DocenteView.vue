@@ -5,6 +5,7 @@
       <button @click="cerrarSesion">Cerrar Sesión</button>
     </header>
     <CalendarioSemanal/>
+    <ReportarIncidencia/>
   </div>
 </template>
 
@@ -12,7 +13,7 @@
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import CalendarioSemanal from '@/components/CalendarioSemanal.vue';
-
+import ReportarIncidencia from '@/components/ReportarIncidencia.vue';
 const auth = useAuthStore();
 const router = useRouter();
 
