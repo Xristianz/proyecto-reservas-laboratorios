@@ -27,3 +27,17 @@ export const usuarioService = {
   editar: (id, u) => apiFetch(`/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(u) }),
   eliminar: (id) => apiFetch(`/usuarios/${id}`, { method: 'DELETE' }),
 };
+
+export const labService = {
+  listar: () => apiFetch('/laboratorios'),
+  crear: (lab) => apiFetch('/laboratorios', { method: 'POST', body: JSON.stringify(lab) }),
+  editar: (id, lab) => apiFetch(`/laboratorios/${id}`, { method: 'PUT', body: JSON.stringify(lab) }),
+  eliminar: (id) => apiFetch(`/laboratorios/${id}`, { method: 'DELETE' }),
+};
+
+export const equipoService = {
+  listar: () => apiFetch('/equipos'),
+  crear: (eq) => apiFetch('/equipos', { method: 'POST', body: JSON.stringify(eq) }),
+  editar: (id, eq) => apiFetch(`/equipos/${id}`, { method: 'PUT', body: JSON.stringify(eq) }),
+  eliminar: (id) => apiFetch(`/equipos/${id}`, { method: 'DELETE' }),
+};
