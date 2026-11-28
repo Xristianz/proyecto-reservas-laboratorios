@@ -16,7 +16,7 @@ function obtenerFechaHoraLocal() {
 
 function obtenerDiaSemana(fechaStr) {
   const [anio, mes, dia] = fechaStr.split('-').map(Number);
-  return new Date(anio, mes - 1, dia).getDay(); // 0=Dom, 1=Lun ... 6=Sáb
+  return new Date(anio, mes - 1, dia).getDay();
 }
 
 // Obtener horarios, bloqueos y reservas de un laboratorio para una semana
