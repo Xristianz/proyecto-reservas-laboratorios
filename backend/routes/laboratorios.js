@@ -4,11 +4,13 @@ import { verificarToken, permitirRoles } from '../middleware/auth.js';
 
 const router = Router();
 
+// Listar todos
 router.get('/', verificarToken, (req, res) => {
   const labs = db.prepare('SELECT * FROM laboratorios').all();
   res.json(labs);
 });
 
+// Crear
 router.post('/', verificarToken, permitirRoles('admin'), (req, res) => {
   const { nombre, ubicacion, capacidad, software, foto, estado } = req.body;
   const cap = Number(capacidad);
@@ -35,6 +37,7 @@ router.post('/', verificarToken, permitirRoles('admin'), (req, res) => {
   }
 });
 
+// Editar
 router.put('/:id', verificarToken, permitirRoles('admin'), (req, res) => {
   const { nombre, ubicacion, capacidad, software, foto, estado } = req.body;
   const cap = Number(capacidad);
@@ -65,6 +68,7 @@ router.put('/:id', verificarToken, permitirRoles('admin'), (req, res) => {
   }
 });
 
+// Eliminar
 router.delete('/:id', verificarToken, permitirRoles('admin'), (req, res) => {
   const labId = req.params.id;
 

@@ -4,6 +4,7 @@ import { verificarToken, permitirRoles } from '../middleware/auth.js';
 
 const router = Router();
 
+// Listar equipos con el nombre de su laboratorio
 router.get('/', verificarToken, (req, res) => {
   const equipos = db.prepare(`
     SELECT e.*, l.nombre AS laboratorio_nombre
@@ -13,6 +14,7 @@ router.get('/', verificarToken, (req, res) => {
   res.json(equipos);
 });
 
+// Crear equipo (solo admin)
 router.post('/', verificarToken, permitirRoles('admin'), (req, res) => {
   const { codigo, tipo, laboratorio_id, estado } = req.body;
   const estadoFinal = estado || 'operativo';
@@ -40,6 +42,7 @@ router.post('/', verificarToken, permitirRoles('admin'), (req, res) => {
   }
 });
 
+// Editar equipo (solo admin)
 router.put('/:id', verificarToken, permitirRoles('admin'), (req, res) => {
   const { codigo, tipo, laboratorio_id, estado } = req.body;
 
@@ -70,6 +73,7 @@ router.put('/:id', verificarToken, permitirRoles('admin'), (req, res) => {
   }
 });
 
+// Eliminar equipo (solo admin)
 router.delete('/:id', verificarToken, permitirRoles('admin'), (req, res) => {
   try {
     const info = db.prepare('DELETE FROM equipos WHERE id = ?').run(req.params.id);
