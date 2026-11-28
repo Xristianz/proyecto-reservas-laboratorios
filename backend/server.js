@@ -9,6 +9,7 @@ import labRoutes from './routes/laboratorios.js';
 import equipoRoutes from './routes/equipos.js';
 import horarioRoutes from './routes/horarios.js';
 import incidenciaRoutes from './routes/incidencias.js';
+import reservaRoutes from './routes/reservas.js';
 
 const app = express();
 app.use(cors());
@@ -36,5 +37,6 @@ app.use('/api/laboratorios', labRoutes);
 app.use('/api/equipos', equipoRoutes);
 app.use('/api/horarios', horarioRoutes);
 app.use('/api/incidencias', incidenciaRoutes);
+app.use('/api/reservas', reservaRoutes);
 
 app.listen(3000, () => console.log('API corriendo en http://localhost:3000'));
