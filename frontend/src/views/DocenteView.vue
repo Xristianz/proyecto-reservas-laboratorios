@@ -4,12 +4,14 @@
       <h1>Panel de Docente</h1>
       <button @click="cerrarSesion">Cerrar Sesión</button>
     </header>
+    <CalendarioSemanal/>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import CalendarioSemanal from '@/components/CalendarioSemanal.vue';
 
 const auth = useAuthStore();
 const router = useRouter();

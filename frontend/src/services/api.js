@@ -41,3 +41,10 @@ export const equipoService = {
   editar: (id, eq) => apiFetch(`/equipos/${id}`, { method: 'PUT', body: JSON.stringify(eq) }),
   eliminar: (id) => apiFetch(`/equipos/${id}`, { method: 'DELETE' }),
 };
+
+export const horarioService = {
+  obtenerPorLab: (labId, inicio, fin) =>
+    apiFetch(`/horarios/${labId}?inicio=${inicio}&fin=${fin}`),
+  crear: (h) => apiFetch('/horarios', { method: 'POST', body: JSON.stringify(h) }),
+  eliminar: (id) => apiFetch(`/horarios/${id}, { method: 'DELETE' }`),
+};

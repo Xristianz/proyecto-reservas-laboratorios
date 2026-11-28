@@ -117,6 +117,11 @@ h2 {
   padding-bottom: 0.4rem;
 }
 
+h3 {
+  font-size: 1.05rem;
+  margin: 1rem 0 0.5rem;
+  color: var(--text);
+}
 
 form {
   display: grid;
