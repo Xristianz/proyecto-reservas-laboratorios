@@ -14,8 +14,21 @@ function obtenerFechaHoraLocal() {
   return { fechaHoy: `${anio}-${mes}-${dia}`, horaActual: `${hora}:${min}` };
 }
 
+function actualizarReservasFinalizadas() {
+  const { fechaHoy, horaActual } = obtenerFechaHoraLocal();
+
+  db.prepare(`
+    UPDATE reservas
+    SET estado = 'Finalizada'
+    WHERE estado = 'Aprobada'
+      AND (fecha < ? OR (fecha = ? AND hora_fin <= ?))
+  `).run(fechaHoy, fechaHoy, horaActual);
+}
+
 // Listar reservas
 router.get('/', verificarToken, (req, res) => {
+  actualizarReservasFinalizadas();
+
   const baseQuery = `
     SELECT r.*, u.nombre AS usuario_nombre, u.rol AS usuario_rol,
            l.nombre AS laboratorio_nombre, e.codigo AS equipo_codigo
@@ -37,8 +50,10 @@ router.get('/', verificarToken, (req, res) => {
 });
 
 // Crear solicitud de laboratorio
-router.post('/', verificarToken, permitirRoles('docente'), (req, res) => {
-  const { laboratorio_id, fecha, hora_inicio, hora_fin, asignatura, motivo } = req.body;
+router.post('/', verificarToken, permitirRoles('docente', 'estudiante'), (req, res) => {
+  actualizarReservasFinalizadas();
+
+  const { laboratorio_id, equipo_id, fecha, hora_inicio, hora_fin, asignatura, motivo } = req.body;
   const { fechaHoy, horaActual } = obtenerFechaHoraLocal();
 
   if (hora_inicio >= hora_fin) {
@@ -63,32 +78,85 @@ router.post('/', verificarToken, permitirRoles('docente'), (req, res) => {
     return res.status(400).json({ error: `Franja bloqueada: ${bloqueo.motivo || 'No disponible'}` });
   }
 
-  const solape = db.prepare(`
+  if (req.usuario.rol === 'docente') {
+    const solape = db.prepare(`
+      SELECT id FROM reservas
+      WHERE laboratorio_id = ? AND fecha = ? AND estado = 'Aprobada'
+        AND hora_inicio < ? AND hora_fin > ?
+    `).get(laboratorio_id, fecha, hora_fin, hora_inicio);
+
+    if (solape) {
+      return res.status(400).json({ error: 'Ya existe una reserva aprobada en ese horario' });
+    }
+
+    const info = db.prepare(`
+      INSERT INTO reservas (usuario_id, laboratorio_id, equipo_id, fecha, hora_inicio, hora_fin, asignatura, motivo, estado)
+      VALUES (?, ?, NULL, ?, ?, ?, ?, ?, 'Pendiente')
+    `).run(req.usuario.id, laboratorio_id, fecha, hora_inicio, hora_fin, asignatura || '', motivo || '');
+
+    const admins = db.prepare("SELECT id FROM usuarios WHERE rol = 'admin'").all();
+    const insertNotif = db.prepare('INSERT INTO notificaciones (usuario_id, mensaje) VALUES (?, ?)');
+    for (const a of admins) {
+      insertNotif.run(a.id, `Nueva solicitud de ${req.usuario.nombre} para ${lab.nombre} (${fecha})`);
+    }
+
+    return res.status(201).json({ id: info.lastInsertRowid, estado: 'Pendiente' });
+  }
+
+  if (!equipo_id) {
+    return res.status(400).json({ error: 'Debes seleccionar un equipo' });
+  }
+
+  const equipo = db.prepare(
+    'SELECT * FROM equipos WHERE id = ? AND laboratorio_id = ?'
+  ).get(equipo_id, laboratorio_id);
+
+  if (!equipo || equipo.estado !== 'operativo') {
+    return res.status(400).json({ error: 'El equipo no está operativo o no pertenece a este laboratorio' });
+  }
+
+  const reservaDocente = db.prepare(`
     SELECT id FROM reservas
+    WHERE laboratorio_id = ? AND fecha = ? AND equipo_id IS NULL AND estado = 'Aprobada'
+      AND hora_inicio < ? AND hora_fin > ?
+  `).get(laboratorio_id, fecha, hora_fin, hora_inicio);
+
+  if (reservaDocente) {
+    return res.status(400).json({ error: 'El laboratorio está reservado por completo por un docente en esa franja' });
+  }
+
+  const equipoOcupado = db.prepare(`
+    SELECT id FROM reservas
+    WHERE equipo_id = ? AND fecha = ? AND estado = 'Aprobada'
+      AND hora_inicio < ? AND hora_fin > ?
+  `).get(equipo_id, fecha, hora_fin, hora_inicio);
+
+  if (equipoOcupado) {
+    return res.status(400).json({ error: 'Ese equipo ya está reservado en ese horario' });
+  }
+
+  const { total } = db.prepare(`
+    SELECT COUNT(*) AS total FROM reservas
     WHERE laboratorio_id = ? AND fecha = ? AND estado = 'Aprobada'
       AND hora_inicio < ? AND hora_fin > ?
   `).get(laboratorio_id, fecha, hora_fin, hora_inicio);
 
-  if (solape) {
-    return res.status(400).json({ error: 'Ya existe una reserva aprobada en ese horario' });
+  if (total >= lab.capacidad) {
+    return res.status(400).json({ error: 'El laboratorio alcanzó su capacidad máxima en esa franja' });
   }
 
   const info = db.prepare(`
-    INSERT INTO reservas (usuario_id, laboratorio_id, equipo_id, fecha, hora_inicio, hora_fin, asignatura, motivo, estado)
-    VALUES (?, ?, NULL, ?, ?, ?, ?, ?, 'Pendiente')
-  `).run(req.usuario.id, laboratorio_id, fecha, hora_inicio, hora_fin, asignatura || '', motivo || '');
+    INSERT INTO reservas (usuario_id, laboratorio_id, equipo_id, fecha, hora_inicio, hora_fin, estado)
+    VALUES (?, ?, ?, ?, ?, ?, 'Aprobada')
+  `).run(req.usuario.id, laboratorio_id, equipo_id, fecha, hora_inicio, hora_fin);
 
-  const admins = db.prepare("SELECT id FROM usuarios WHERE rol = 'admin'").all();
-  const insertNotif = db.prepare('INSERT INTO notificaciones (usuario_id, mensaje) VALUES (?, ?)');
-  for (const a of admins) {
-    insertNotif.run(a.id, `Nueva solicitud de ${req.usuario.nombre} para ${lab.nombre} (${fecha})`);
-  }
-
-  res.status(201).json({ id: info.lastInsertRowid, estado: 'Pendiente' });
+  res.status(201).json({ id: info.lastInsertRowid, estado: 'Aprobada' });
 });
 
 // Aprobar/rechazar solicitud
 router.patch('/:id/resolver', verificarToken, permitirRoles('admin'), (req, res) => {
+  actualizarReservasFinalizadas();
+
   const { estado, mensaje_admin } = req.body;
   if (!['Aprobada', 'Rechazada'].includes(estado)) {
     return res.status(400).json({ error: 'Estado inválido' });
