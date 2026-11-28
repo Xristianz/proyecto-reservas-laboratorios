@@ -28,11 +28,12 @@ CREATE TABLE IF NOT EXISTS equipos (
 CREATE TABLE IF NOT EXISTS horarios_bloqueos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   laboratorio_id INTEGER NOT NULL,
-  dia_semana INTEGER NOT NULL, 
-  hora_inicio TEXT NOT NULL,   
-  hora_fin TEXT NOT NULL,     
+  fecha TEXT NOT NULL,         -- 'YYYY-MM-DD'
+  dia_semana INTEGER NOT NULL, -- 1 (Lunes) a 6 (Sábado)
+  hora_inicio TEXT NOT NULL,   -- ej: '08:00'
+  hora_fin TEXT NOT NULL,      -- ej: '10:00'
   tipo TEXT CHECK(tipo IN ('atencion', 'bloqueo')) NOT NULL,
-  motivo TEXT,                 
+  motivo TEXT,                 -- ej: 'Clase fija', 'Mantenimiento'
   FOREIGN KEY (laboratorio_id) REFERENCES laboratorios(id) ON DELETE CASCADE
 );
 
@@ -40,8 +41,8 @@ CREATE TABLE IF NOT EXISTS reservas (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   usuario_id INTEGER NOT NULL,
   laboratorio_id INTEGER NOT NULL,
-  equipo_id INTEGER,          
-  fecha TEXT NOT NULL,        
+  equipo_id INTEGER,           -- NULL si es docente reservando lab completo
+  fecha TEXT NOT NULL,         -- 'YYYY-MM-DD'
   hora_inicio TEXT NOT NULL,
   hora_fin TEXT NOT NULL,
   asignatura TEXT,
