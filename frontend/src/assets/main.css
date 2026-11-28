@@ -24,6 +24,7 @@ body {
   line-height: 1.5;
 }
 
+
 .admin-panel {
   --primary: #312e81;
   --primary-hover: #1e1b4b;
@@ -41,7 +42,6 @@ body {
   --primary-hover: #065f46;
   --accent-bg: #d1fae5;
 }
-
 
 .admin-panel,
 .docente-panel,
@@ -80,6 +80,44 @@ header button:hover {
 }
 
 
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tabs button {
+  background-color: var(--card);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.tabs button:hover,
+.tabs button:focus {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+
+section {
+  background-color: var(--card);
+  padding: 1.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+h2 {
+  color: var(--primary);
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--accent-bg);
+  padding-bottom: 0.4rem;
+}
+
+
 form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -88,7 +126,8 @@ form {
   align-items: center;
 }
 
-input {
+input,
+select {
   width: 100%;
   padding: 0.6rem 0.75rem;
   border: 1px solid #d1d5db;
@@ -97,7 +136,8 @@ input {
   background: #ffffff;
 }
 
-input:focus {
+input:focus,
+select:focus {
   outline: 2px solid var(--primary);
   border-color: transparent;
 }
@@ -116,6 +156,38 @@ button {
 button:hover {
   background-color: var(--primary-hover);
 }
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background-color: var(--accent-bg);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+tr:hover {
+  background-color: #f9fafb;
+}
+
+td button {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  margin-right: 0.35rem;
+}
+
 
 .login-box {
   max-width: 400px;
@@ -143,6 +215,7 @@ button:hover {
   margin-top: 0.5rem;
 }
 
+
 @media (max-width: 768px) {
   .admin-panel,
   .docente-panel,
@@ -153,5 +226,11 @@ button:hover {
   header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 }

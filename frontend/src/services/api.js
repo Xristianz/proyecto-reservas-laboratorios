@@ -21,3 +21,9 @@ export const authService = {
       body: JSON.stringify({ email, password }),
     }),
 };
+export const usuarioService = {
+  listar: () => apiFetch('/usuarios'),
+  crear: (u) => apiFetch('/usuarios', { method: 'POST', body: JSON.stringify(u) }),
+  editar: (id, u) => apiFetch(`/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(u) }),
+  eliminar: (id) => apiFetch(`/usuarios/${id}`, { method: 'DELETE' }),
+};
